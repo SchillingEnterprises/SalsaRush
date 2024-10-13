@@ -1,0 +1,67 @@
+body {
+    font-family: 'Playfair Display', serif;
+    background: url('images/background.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#logo > img {
+    max-width: 25%;
+    height: auto;
+}
+
+// <uniquifier>: Use a unique and descriptive class name
+// <weight>: Use a value from 200 to 700
+
+.oswald-<uniquifier> {
+  font-family: "Oswald", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
+
+// <uniquifier>: Use a unique and descriptive class name
+// <weight>: Use a value from 400 to 900
+
+.playfair-display-<uniquifier> {
+  font-family: "Playfair Display", serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+}
+
+body {
+    font-family: 'Playfair Display', serif;
+    background: url('casino-salsa-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.glitter-text {
+    font-size: 2em;
+    animation: glitter 1.5s infinite;
+}
+
+@keyframes glitter {
+    0% {
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        text-shadow: 2px 2px 12px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.4);
+    }
+}
+
+.container {
+    max-width: 800px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    margin: auto;
+}

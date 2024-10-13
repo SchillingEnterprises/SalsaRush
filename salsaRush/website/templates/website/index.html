@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Salsa Rush</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Playfair Display', serif;
+            background: url('{% static "website/images/background.png" %}') no-repeat center center fixed;
+            background-size: cover;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            overflow-x: hidden;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            margin-bottom: 20px;
+        }
+        #logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        #logo img {
+            width: 250px;
+        }
+        .glitter-text {
+            font-size: 1.5em;
+            animation: glitter 1.5s infinite;
+        }
+        @keyframes glitter {
+            0% {
+                text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                text-shadow: 2px 2px 12px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.4);
+            }
+        }
+        .offcanvas {
+            background: rgba(0, 0, 0, 0.7);
+            color: #ffffff;
+        }
+        .offcanvas-title {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+        }
+        .offcanvas-body {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="logo">
+        <img src="{% static 'website/images/logo.png' %}" alt="Salsa Rush Logo">
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"></a>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-end show" id="offcanvasRight" data-bs-scroll="true" tabindex="-1" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Salsa En El Paraíso by Gavin Schilling</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="container">
+                <p class="glitter-text">In the heart of the night, the stars align,<br>Where fortune meets fate, and dreams entwine,<br>Dance through the shadows, where the lights collide,<br>In a world of chance, let your spirit ride.</p>
+                <p class="glitter-text chorus">Baila, baila, con el corazón,<br>Al ritmo de la vida, en esta canción,<br>Gira, gira, en un mar de luces,<br>Casino Salsa, where the soul rejoices.</p>
+                <p class="glitter-text">Through the highs and the lows, we find our way,<br>With every step we take, the night turns to day,<br>In the pulse of the music, we are set free,<br>Timeless beauty in every melody.</p>
+                <p class="glitter-text chorus">Baila, baila, con el corazón,<br>Al ritmo de la vida, en esta canción,<br>Gira, gira, en un mar de luces,<br>Casino Salsa, where the soul rejoices.</p>
+                <p class="glitter-text outro">La vida es un juego, y nosotros los jugadores,<br>En cada vuelta, hay nuevos colores,<br>Casino Salsa, we dance forevermore,<br>In this eternal rhythm, our spirits soar.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var offcanvasElementList = [].slice.call(document.querySelectorAll('.offcanvas'))
+            var offcanvasList = offcanvasElementList.map(function (offcanvasEl) {
+                return new bootstrap.Offcanvas(offcanvasEl)
+            })
+            offcanvasList[0].show();
+        });
+    </script>
+</body>
+</html>
