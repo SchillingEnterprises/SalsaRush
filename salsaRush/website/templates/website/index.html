@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
@@ -68,19 +69,60 @@
     </style>
 </head>
 <body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'website:about' %}">About</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Events Calendar
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            {% for event in events %}
+                            <li>
+                                <div class="dropdown-item">
+                                    <strong>{{ event.date_time }}</strong><br>
+                                    {{ event.title }}<br>
+                                    <small>{{ event.location }}</small>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="text-center">Upcoming Events</h1>
+        <p class="text-center">Stay up-to-date with the latest events and happenings.</p>
+        <ul class="list-group">
+            {% for event in events %}
+            <li class="list-group-item">
+                <strong>{{ event.date }}</strong><br>
+                {{ event.title }}<br>
+                <small>{{ event.location }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <div id="logo">
         <img src="{% static 'website/images/logo.png' %}" alt="Salsa Rush Logo">
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#"></a>
-        </div>
-    </nav>
-
     <div class="offcanvas offcanvas-end show" id="offcanvasRight" data-bs-scroll="true" tabindex="-1" aria-labelledby="offcanvasRightLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasRightLabel">Salsa En El Paraíso by Gavin Schilling</h5>
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Salsa En El Paraíso</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">

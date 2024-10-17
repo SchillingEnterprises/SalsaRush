@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <title>Create Event</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Create Event</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% crispy form %}
+            <button type="submit" class="btn btn-primary">Save Event</button>
+        </form>
+    </div>
+</body>
+</html>
