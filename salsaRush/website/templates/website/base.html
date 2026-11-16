@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15121b">
+  <meta name="description" content="{% block meta_description %}Salsa Rush — music, movement, and unforgettable nights on the dance floor.{% endblock %}">
+  <title>{% block title %}Salsa Rush{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'website/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="{% url 'website:index' %}" aria-label="Salsa Rush home">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>Salsa <strong>Rush</strong></span>
+    </a>
+    <button class="menu-toggle" type="button" aria-controls="primary-nav" aria-expanded="false">
+      <span class="menu-icon" aria-hidden="true"></span>
+      <span class="sr-only">Toggle navigation</span>
+    </button>
+    <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
+      <a href="{% url 'website:event_list' %}">Events</a>
+      <a href="{% url 'website:about' %}">Our story</a>
+      <a href="{% url 'website:contact' %}">Connect</a>
+      <a class="nav-cta" href="{% url 'website:event_list' %}">Find your rhythm <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  {% block main %}{% endblock %}
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="{% url 'website:index' %}">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>Salsa <strong>Rush</strong></span>
+    </a>
+    <p>Made for the music, the movement, and the people who bring the room to life.</p>
+    <div class="footer-links">
+      <a href="{% url 'website:event_list' %}">Events</a>
+      <a href="{% url 'website:about' %}">Our story</a>
+      <a href="https://www.instagram.com/salsarush/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+    </div>
+    <small>Event details are published by authorized organizers. Verify venue and schedule information before travelling.</small>
+  </footer>
+  <script src="{% static 'website/site.js' %}" defer></script>
+</body>
+</html>
