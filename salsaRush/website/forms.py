@@ -1,5 +1,6 @@
 """Validated forms for staff-managed event publishing."""
 from django import forms
+from django.utils import timezone
 
 from .models import Event
 
@@ -19,6 +20,12 @@ class EventForm(forms.ModelForm):
                 format="%Y-%m-%dT%H:%M",
             ),
         }
+
+    def clean_date_time(self):
+        event_time = self.cleaned_data["date_time"]
+        if event_time <= timezone.now():
+            raise forms.ValidationError("Choose a date and time in the future.")
+        return event_time
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
