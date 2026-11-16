@@ -6,7 +6,7 @@ class User(models.Model):
     """Legacy project profile record; not Django's authentication user model."""
 
     username = models.CharField(max_length=100)
-    password = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, editable=False)
     email = models.EmailField()
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
