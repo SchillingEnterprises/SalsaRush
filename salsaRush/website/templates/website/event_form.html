@@ -1,20 +1,26 @@
-{% load crispy_forms_tags %}
-{% load static %}
-
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-    <title>Create Event</title>
-</head>
-<body>
-    <div class="container mt-4">
-        <h1>Create Event</h1>
-        <form method="post">
-            {% csrf_token %}
-            {% crispy form %}
-            <button type="submit" class="btn btn-primary">Save Event</button>
-        </form>
-    </div>
-</body>
-</html>
+{% extends "website/base.html" %}
+{% block title %}Publish an Event | Salsa Rush{% endblock %}
+{% block main %}
+<main id="main" class="page-main">
+  <section class="page-hero compact">
+    <p class="eyebrow dark">ORGANIZER WORKSPACE</p>
+    <h1>Publish an<br><em>event.</em></h1>
+    <p>Event publishing is restricted to authorized staff accounts.</p>
+  </section>
+  <section class="section-wrap form-section">
+    <form method="post" class="event-form" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="form-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% if field.errors %}<div class="field-errors" role="alert">{{ field.errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="button-primary" type="submit">Publish event <span aria-hidden="true">↗</span></button>
+    </form>
+  </section>
+</main>
+{% endblock %}
