@@ -1,7 +1,10 @@
+"""Database models for the Salsa Rush event and community concept."""
 from django.db import models
 
-# Create your models here.
+
 class User(models.Model):
+    """Legacy project profile record; not Django's authentication user model."""
+
     username = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     email = models.EmailField()
@@ -66,22 +69,27 @@ class Comment(models.Model):
 
 
 class Event(models.Model):
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    date = models.DateField()
-    time = models.TimeField()
+    """Event fields intentionally match the existing migration history."""
+
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=200)
+    date_time = models.DateTimeField()
+    organizer = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     def __str__(self):
         return self.title
 
 
 class Ticket(models.Model):
-        event = models.ForeignKey(Event, on_delete=models.CASCADE)
-        type = models.CharField(max_length=100)
-        price = models.DecimalField(max_digits=10, decimal_places=2)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    type = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
-        def __str__(self):
-            return f"{self.event.name} - {self.type}"
+    def __str__(self):
+        return f"{self.event.title} - {self.type}"
 
 
 class Venue(models.Model):
@@ -91,7 +99,7 @@ class Venue(models.Model):
     capacity = models.IntegerField()
 
     def __str__(self):
-        return f"{self.event.name} - {self.name}"
+        return f"{self.event.title} - {self.name}"
 
 
 class Speaker(models.Model):
@@ -101,7 +109,7 @@ class Speaker(models.Model):
     photo = models.ImageField(upload_to="speakers")
 
     def __str__(self):
-        return f"{self.event.name} - {self.name}"
+        return f"{self.event.title} - {self.name}"
 
 
 class Partner(models.Model):
@@ -110,7 +118,7 @@ class Partner(models.Model):
     logo = models.ImageField(upload_to="partners")
 
     def __str__(self):
-        return f"{self.event.name} - {self.name}"
+        return f"{self.event.title} - {self.name}"
 
 
 class Guest(models.Model):
@@ -120,7 +128,7 @@ class Guest(models.Model):
     photo = models.ImageField(upload_to="guests")
 
     def __str__(self):
-        return f"{self.event.name} - {self.name}"
+        return f"{self.event.title} - {self.name}"
 
 
 class Exhibitor(models.Model):
@@ -129,4 +137,4 @@ class Exhibitor(models.Model):
     logo = models.ImageField(upload_to="exhibitors")
 
     def __str__(self):
-        return f"{self.event.name} - {self.name}"
+        return f"{self.event.title} - {self.name}"
