@@ -1,0 +1,57 @@
+name: Salsa Rush Django CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master, chore/engineering-quality-modernization]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: salsa-rush-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Django quality checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    defaults:
+      run:
+        working-directory: salsaRush
+    env:
+      DJANGO_SECRET_KEY: ci-only-secret-key-not-for-deployment
+      DJANGO_DEBUG: "false"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DJANGO_SECURE_SSL_REDIRECT: "false"
+      DJANGO_SESSION_COOKIE_SECURE: "false"
+      DJANGO_CSRF_COOKIE_SECURE: "false"
+      DJANGO_HSTS_SECONDS: "0"
+      DJANGO_DB_NAME: /tmp/salsa-rush-ci.sqlite3
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v6.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r ../requirements.txt
+      - name: Compile Python sources
+        run: python -m compileall -q website salsaRush
+      - name: Check Django configuration
+        run: python manage.py check
+      - name: Verify migrations match models
+        run: python manage.py makemigrations --check --dry-run
+      - name: Apply migrations to disposable CI database
+        run: python manage.py migrate --noinput
+      - name: Run application tests
+        run: python manage.py test website --verbosity 2
