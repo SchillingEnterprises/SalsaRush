@@ -64,6 +64,20 @@ class EventManagementTests(TestCase):
         self.assertRedirects(response, reverse("website:event_list"))
         self.assertTrue(Event.objects.filter(title="Community Dance Night").exists())
 
+    def test_past_event_is_rejected_and_not_saved(self):
+        self.client.force_login(self.staff)
+        event_time = (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
+        response = self.client.post(reverse("website:event_create"), {
+            "title": "Past Event", "description": "This should not publish.",
+            "location": "Louisville, KY", "date_time": event_time,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Event.objects.count(), 0)
+        self.assertFormError(
+            response.context["form"], "date_time",
+            "Choose a date and time in the future.",
+        )
+
     def test_invalid_event_is_not_saved(self):
         self.client.force_login(self.staff)
         response = self.client.post(reverse("website:event_create"), {
