@@ -76,13 +76,35 @@ TEMPLATES = [
 WSGI_APPLICATION = "salsaRush.wsgi.application"
 ASGI_APPLICATION = "salsaRush.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("DJANGO_DB_NAME", str(BASE_DIR / "db.sqlite3")),
-        "OPTIONS": {"timeout": 20},
+DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower()
+if DB_ENGINE == "sqlite":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.environ.get("DJANGO_DB_NAME") or str(BASE_DIR / "db.sqlite3"),
+            "OPTIONS": {"timeout": 20},
+        }
     }
-}
+elif DB_ENGINE in {"postgres", "postgresql"}:
+    required_db_values = ("DJANGO_DB_NAME", "DJANGO_DB_USER", "DJANGO_DB_PASSWORD", "DJANGO_DB_HOST")
+    missing_db_values = [name for name in required_db_values if not os.environ.get(name)]
+    if missing_db_values:
+        raise ImproperlyConfigured(
+            "PostgreSQL requires these environment variables: " + ", ".join(missing_db_values)
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DJANGO_DB_NAME"],
+            "USER": os.environ["DJANGO_DB_USER"],
+            "PASSWORD": os.environ["DJANGO_DB_PASSWORD"],
+            "HOST": os.environ["DJANGO_DB_HOST"],
+            "PORT": os.environ.get("DJANGO_DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.environ.get("DJANGO_DB_CONN_MAX_AGE", "60")),
+        }
+    }
+else:
+    raise ImproperlyConfigured("DJANGO_DB_ENGINE must be sqlite or postgresql.")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
