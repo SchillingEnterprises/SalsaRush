@@ -1,12 +1,13 @@
 from datetime import timedelta
 
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from .forms import EventForm
-from .models import Event
+from .models import Event, User as LegacyProfile
 
 
 class PublicPageTests(TestCase):
@@ -84,6 +85,28 @@ class EventManagementTests(TestCase):
         })
         self.assertEqual(response.status_code, 403)
         self.assertEqual(Event.objects.count(), 0)
+
+
+
+class LegacyIdentityIsolationTests(TestCase):
+    def test_legacy_profile_is_not_the_django_authentication_model(self):
+        self.assertIsNot(LegacyProfile, get_user_model())
+
+    def test_legacy_profile_is_not_registered_in_django_admin(self):
+        self.assertNotIn(LegacyProfile, admin.site._registry)
+
+    def test_legacy_password_value_is_never_rendered_on_public_pages(self):
+        marker = "legacy-profile-secret-must-never-be-rendered"
+        LegacyProfile.objects.create(
+            username="archive-only-profile",
+            password=marker,
+            email="legacy-profile@example.test",
+            first_name="Legacy",
+            last_name="Profile",
+        )
+        for route in ("website:index", "website:event_list"):
+            with self.subTest(route=route):
+                self.assertNotContains(self.client.get(reverse(route)), marker)
 
 
 class ModelIntegrityTests(TestCase):
