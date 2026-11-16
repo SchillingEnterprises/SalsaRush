@@ -46,6 +46,9 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r ../requirements.txt
+      - name: Run repository database configuration contracts
+        working-directory: .
+        run: python -m unittest discover -s tests -v
       - name: Compile Python sources
         run: python -m compileall -q website salsaRush
       - name: Check Django configuration
