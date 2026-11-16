@@ -74,7 +74,7 @@ class EventManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Event.objects.count(), 0)
         self.assertFormError(
-            response, "form", "date_time",
+            response.context["form"], "date_time",
             "Choose a date and time in the future.",
         )
 
