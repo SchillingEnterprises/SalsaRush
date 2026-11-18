@@ -27,6 +27,9 @@ class DatabaseConfigurationTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/django.yml").read_text(encoding="utf-8")
         self.assertIn("DJANGO_DB_ENGINE: sqlite", workflow)
         self.assertIn("/tmp/salsa-rush-ci.sqlite3", workflow)
+        self.assertIn("sha256sum db.sqlite3", workflow)
+        self.assertIn("EXPECTED_DATABASE_SHA256", workflow)
+        self.assertIn("Verify tracked database remains unchanged", workflow)
 
     def test_legacy_profile_password_is_not_editable(self):
         models = (ROOT / "salsaRush/website/models.py").read_text(encoding="utf-8")
