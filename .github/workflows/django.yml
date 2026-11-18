@@ -38,6 +38,9 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Record tracked database checksum
+        id: tracked-database
+        run: echo "sha256=$(sha256sum db.sqlite3 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v6.0.0
         with:
@@ -69,3 +72,7 @@ jobs:
         run: python manage.py migrate --noinput
       - name: Run application tests
         run: python manage.py test website --verbosity 2
+      - name: Verify tracked database remains unchanged
+        env:
+          EXPECTED_DATABASE_SHA256: ${{ steps.tracked-database.outputs.sha256 }}
+        run: test "$EXPECTED_DATABASE_SHA256" = "$(sha256sum db.sqlite3 | cut -d' ' -f1)"
