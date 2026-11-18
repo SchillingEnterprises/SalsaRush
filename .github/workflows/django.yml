@@ -55,6 +55,7 @@ jobs:
         run: python manage.py check
       - name: Check production security configuration
         env:
+          DJANGO_SECRET_KEY: "ci-only-deployment-check-key-long-enough-for-django-security-validation"
           DJANGO_DEBUG: "false"
           DJANGO_SECURE_SSL_REDIRECT: "true"
           DJANGO_SESSION_COOKIE_SECURE: "true"
