@@ -13,3 +13,7 @@ Do not publish security-sensitive details in public issues. Use GitHub private v
 - There is no public registration, checkout, or payment-card collection.
 
 Before production, configure a supported application host, production database, HTTPS, private secrets, backups, monitoring, and a suitable privacy notice. Run Django deployment checks in the target environment.
+
+## Tracked development database
+
+The repository includes a tracked SQLite database at `salsaRush/db.sqlite3`. Because this is a public repository, its current contents and historical versions may be accessible to anyone who can read the repository. The database has not been opened or inspected during maintenance. Do not store real customer, attendee, payment, account, or other sensitive records in it. Before any removal or history rewrite, the owner must review its contents and approve a backup, data-retention decision, and repository-history cleanup plan. CI uses a disposable database and verifies that the tracked file's checksum does not change.
