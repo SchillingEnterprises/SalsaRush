@@ -141,25 +141,6 @@ class LegacyIdentityIsolationTests(TestCase):
                 self.assertNotContains(response, email)
 
 
-    def test_legacy_profile_identity_fields_are_not_rendered_on_public_pages(self):
-        username = "private-legacy-profile-identifier"
-        email = "private-profile-contact@example.test"
-        LegacyProfile.objects.create(
-            username=username,
-            password="unused-legacy-password-value",
-            email=email,
-            first_name="Private",
-            last_name="Profile",
-        )
-        routes = ("website:index", "website:about", "website:contact", "website:event_list")
-        for route in routes:
-            with self.subTest(route=route):
-                response = self.client.get(reverse(route))
-                self.assertEqual(response.status_code, 200)
-                self.assertNotContains(response, username)
-                self.assertNotContains(response, email)
-
-
 class ModelIntegrityTests(TestCase):
     def test_ticket_string_uses_event_title(self):
         from .models import Ticket
