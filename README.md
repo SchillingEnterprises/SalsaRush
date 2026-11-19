@@ -10,7 +10,7 @@ A Django-powered dance and event concept with a public event calendar and staff-
 - Django admin event management.
 - No public registration, sign-in, payment, or ticket checkout.
 
-This is a prototype, not a live ticketing service. The legacy custom website.User table remains for database compatibility; it is not Django authentication. Its password column is non-editable and must not be used for credentials. See SECURITY.md.
+This is a prototype, not a live ticketing service. The legacy custom website.User table remains for database compatibility; it is not Django authentication. Its password column is non-editable and must not be used for credentials. Review the [security policy](SECURITY.md) before configuring or deploying the application.
 
 ## Requirements
 
