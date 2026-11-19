@@ -1,11 +1,60 @@
 """Source contracts for Salsa Rush's local and production database configuration."""
 from pathlib import Path
+import os
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class DatabaseConfigurationTests(unittest.TestCase):
+    def test_invalid_boolean_environment_value_fails_closed(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "tru",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; print(settings.DEBUG)"],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("DJANGO_DEBUG must be an explicit boolean value", result.stderr)
+
+    def test_explicit_false_boolean_environment_values_are_supported(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_SECURE_SSL_REDIRECT": "off",
+            "DJANGO_SESSION_COOKIE_SECURE": "0",
+            "DJANGO_CSRF_COOKIE_SECURE": "no",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DEBUG is False; "
+                "assert settings.SECURE_SSL_REDIRECT is False; "
+                "assert settings.SESSION_COOKIE_SECURE is False; "
+                "assert settings.CSRF_COOKIE_SECURE is False"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
     def test_sqlite_is_local_default_and_path_can_be_overridden(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
         self.assertIn('os.environ.get("DJANGO_DB_ENGINE", "sqlite")', settings)
