@@ -25,12 +25,9 @@ def env_bool(name: str, default: bool = False) -> bool:
 DEBUG = env_bool("DJANGO_DEBUG", False)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
-    if DEBUG:
-        SECRET_KEY = "django-insecure-local-development-only-change-me"
-    else:
-        raise ImproperlyConfigured(
-            "Set DJANGO_SECRET_KEY to a unique, private value before starting."
-        )
+    raise ImproperlyConfigured(
+        "Set DJANGO_SECRET_KEY to a unique, private value before starting."
+    )
 
 ALLOWED_HOSTS = [
     host.strip()
