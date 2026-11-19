@@ -60,6 +60,12 @@ class DatabaseConfigurationTests(unittest.TestCase):
         self.assertIn('os.environ.get("DJANGO_DB_ENGINE", "sqlite")', settings)
         self.assertIn('os.environ.get("DJANGO_DB_NAME") or str(BASE_DIR / "db.sqlite3")', settings)
 
+    def test_secret_key_is_required_even_in_debug_mode(self):
+        settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
+        self.assertIn('SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")', settings)
+        self.assertIn('raise ImproperlyConfigured(', settings)
+        self.assertNotIn("django-insecure-local-development-only-change-me", settings)
+
     def test_postgresql_requires_all_connection_values(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
         self.assertIn('django.db.backends.postgresql', settings)
