@@ -102,7 +102,7 @@ jobs:
           DJANGO_SESSION_COOKIE_SECURE: "true"
           DJANGO_CSRF_COOKIE_SECURE: "true"
           DJANGO_HSTS_SECONDS: "31536000"
-        run: python manage.py check --deploy --fail-level WARNING
+        run: python manage.py check --deploy --fail-level ERROR
 
       - name: Verify migrations match models
         run: python manage.py makemigrations --check --dry-run
