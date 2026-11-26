@@ -86,6 +86,21 @@ class DatabaseConfigurationTests(unittest.TestCase):
         self.assertIn("EXPECTED_DATABASE_SHA256", workflow)
         self.assertIn("Verify tracked database remains unchanged", workflow)
 
+    def test_ci_rejects_changes_to_preserved_database_using_git_metadata(self):
+        workflow = (ROOT / ".github/workflows/django.yml").read_text(encoding="utf-8")
+        self.assertIn(
+            "Ensure the preserved database is unchanged from the base revision",
+            workflow,
+        )
+        self.assertIn(
+            'git -C "$GITHUB_WORKSPACE" ls-tree "$comparison_base" -- salsaRush/db.sqlite3',
+            workflow,
+        )
+        self.assertIn(
+            'git -C "$GITHUB_WORKSPACE" ls-tree "$GITHUB_SHA" -- salsaRush/db.sqlite3',
+            workflow,
+        )
+
     def test_legacy_profile_password_is_not_editable(self):
         models = (ROOT / "salsaRush/website/models.py").read_text(encoding="utf-8")
         self.assertIn('password = models.CharField(max_length=100, editable=False)', models)
