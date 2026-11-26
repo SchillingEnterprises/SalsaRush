@@ -38,6 +38,37 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Ensure the preserved database is unchanged from the base revision
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            comparison_base="$BASE_SHA"
+          else
+            comparison_base="$BEFORE_SHA"
+          fi
+
+          if [[ -z "$comparison_base" || "$comparison_base" =~ ^0+$ ]]; then
+            echo "::notice::No comparison revision is available for this event."
+            exit 0
+          fi
+
+          git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin "$comparison_base"
+          base_blob="$(git -C "$GITHUB_WORKSPACE" ls-tree "$comparison_base" -- salsaRush/db.sqlite3 | awk '{print $3}')"
+          head_blob="$(git -C "$GITHUB_WORKSPACE" ls-tree "$GITHUB_SHA" -- salsaRush/db.sqlite3 | awk '{print $3}')"
+
+          if [[ -z "$base_blob" || "$base_blob" != "$head_blob" ]]; then
+            echo "::error::The preserved SQLite database must not be modified, replaced, or removed before the owner approves a private backup, retention decision, and history-remediation plan."
+            exit 1
+          fi
+
+          echo "The tracked database Git object is unchanged from the base revision."
+
       - name: Record tracked database checksum
         id: tracked-database
         run: echo "sha256=$(sha256sum db.sqlite3 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
