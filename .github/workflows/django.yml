@@ -36,8 +36,17 @@ jobs:
       DJANGO_HSTS_SECONDS: "0"
       DJANGO_DB_NAME: /tmp/salsa-rush-ci.sqlite3
     steps:
-      - name: Check out source
+      - name: Check out source without the tracked SQLite database
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: |
+            /*
+            !/salsaRush/db.sqlite3
+          sparse-checkout-cone-mode: false
+
+      - name: Verify the tracked database is excluded from the CI workspace
+        working-directory: .
+        run: test ! -e salsaRush/db.sqlite3
 
       - name: Ensure the preserved database is unchanged from the base revision
         if: github.event_name != 'workflow_dispatch'
