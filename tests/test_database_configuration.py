@@ -125,6 +125,8 @@ class DatabaseConfigurationTests(unittest.TestCase):
     def test_sqlite_is_local_default_and_path_can_be_overridden(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
         self.assertIn('os.environ.get("DJANGO_DB_ENGINE", "sqlite")', settings)
+        self.assertIn('if DB_ENGINE == "sqlite":', settings)
+        self.assertIn("if not DEBUG:", settings)
         self.assertIn('os.environ.get("DJANGO_DB_NAME") or str(BASE_DIR / "db.sqlite3")', settings)
 
     def test_sqlite_is_restricted_to_debug_development(self):
@@ -269,6 +271,9 @@ class DatabaseConfigurationTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertIn(name, settings)
         self.assertIn("raise ImproperlyConfigured", settings)
+        self.assertIn('os.environ.get("DJANGO_DB_SSLMODE", "verify-full")', settings)
+        self.assertIn('{"verify-ca", "verify-full"}', settings)
+        self.assertIn('"CONN_HEALTH_CHECKS": True', settings)
 
     def test_psycopg_is_in_active_runtime(self):
         requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
