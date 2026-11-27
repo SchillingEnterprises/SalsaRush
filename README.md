@@ -53,11 +53,11 @@ GitHub Actions runs checks on Python 3.12, 3.13, and 3.14 using a temporary SQLi
 
 ## Hosting
 
-This is a Django application. GitHub Pages can host static HTML/CSS/JavaScript but cannot run the Django backend or database. The settings support an environment-configured PostgreSQL database through `DJANGO_DB_ENGINE=postgresql`; local development and CI use SQLite. A production release still needs a separate application host, managed PostgreSQL, secrets, HTTPS, backups, and monitoring.
+This is a Django application. GitHub Pages can host static HTML/CSS/JavaScript but cannot run the Django backend or database. Local development and CI use SQLite only with `DJANGO_DEBUG=true`; non-debug settings reject SQLite. Production must set `DJANGO_DB_ENGINE=postgresql` and provide the database name, user, password, and host. Direct PostgreSQL connections require server-certificate verification (`verify-full` by default, or `verify-ca` for private CA configurations); use `DJANGO_DB_SSLROOTCERT` when the provider requires a custom CA bundle. A production release still needs a separate application host, managed PostgreSQL, secrets, HTTPS, backups, and monitoring.
 
 The committed SQLite file and existing migration history have been preserved. CI only migrates its disposable database. Verify event organizers, venues, schedules, images, and any ticket details before presenting an event as active or accepting payment.
 
 
 ### PostgreSQL deployment configuration
 
-Set `DJANGO_DB_ENGINE=postgresql` and provide `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, `DJANGO_DB_HOST`, and optionally `DJANGO_DB_PORT` and `DJANGO_DB_CONN_MAX_AGE`. Load the password from a secret manager; do not commit it. The app intentionally raises a configuration error if PostgreSQL is selected without all required connection values. CI remains pinned to a disposable SQLite database and never writes to the tracked database.
+Set `DJANGO_DB_ENGINE=postgresql` and provide `DJANGO_DB_NAME`, `DJANGO_DB_USER`, `DJANGO_DB_PASSWORD`, and `DJANGO_DB_HOST`; `DJANGO_DB_PORT` defaults to `5432`. `DJANGO_DB_SSLMODE` defaults to `verify-full` and accepts only `verify-ca` or `verify-full`. `DJANGO_DB_CONN_MAX_AGE` defaults to `60` and is bounded to `0–3600` seconds. Load the password and any CA path from a secret manager; do not commit them. SQLite is permitted only with `DJANGO_DEBUG=true`, and a non-debug process fails closed if PostgreSQL settings are missing. CI runs local tests with a disposable SQLite database in debug mode and a synthetic certificate-verified PostgreSQL configuration for the production deployment check; it never writes to the tracked database.

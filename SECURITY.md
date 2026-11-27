@@ -8,11 +8,13 @@ Do not publish security-sensitive details in public issues. Use GitHub private v
 
 - Only authenticated Django staff accounts can publish events.
 - CSRF middleware protects event forms.
+- SQLite is allowed only when `DJANGO_DEBUG=true`; every non-debug process must use PostgreSQL with database name, user, password, and host configured.
+- Direct PostgreSQL connections must validate the server certificate: `DJANGO_DB_SSLMODE` defaults to `verify-full` and accepts only `verify-ca` or `verify-full`. Set `DJANGO_DB_SSLROOTCERT` when the provider requires a custom CA bundle.
 - Production startup requires a unique DJANGO_SECRET_KEY of at least 50 characters with at least 5 distinct characters; DEBUG is disabled by default. Generate it with `python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'` and store it in a secret manager.
 - The legacy website.User table is not Django authentication. Its password column is retained for database compatibility, marked non-editable, and must never be used for login, registration, or credential storage. Existing values should be treated as sensitive.
 - There is no public registration, checkout, or payment-card collection.
 
-Before production, configure a supported application host, production database, HTTPS, private secrets, backups, monitoring, and a suitable privacy notice. Run Django deployment checks in the target environment. HSTS applies to the current host by default; enable `DJANGO_HSTS_INCLUDE_SUBDOMAINS=true` only after confirming that every subdomain is HTTPS-capable.
+Before production, configure a supported application host, managed PostgreSQL, HTTPS, private secrets, backups, monitoring, and a suitable privacy notice. Run Django deployment checks in the target environment. SQLite is rejected when `DJANGO_DEBUG=false`; direct PostgreSQL connections require certificate verification, with `verify-full` as the default. HSTS applies to the current host by default; enable `DJANGO_HSTS_INCLUDE_SUBDOMAINS=true` only after confirming that every subdomain is HTTPS-capable.
 
 ## Tracked development database
 
