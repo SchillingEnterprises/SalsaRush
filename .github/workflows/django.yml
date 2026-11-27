@@ -43,6 +43,7 @@ jobs:
             /*
             !/salsaRush/db.sqlite3
           sparse-checkout-cone-mode: false
+          persist-credentials: false
 
       - name: Verify the tracked database is excluded from the CI workspace
         working-directory: .
@@ -54,6 +55,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           BEFORE_SHA: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
@@ -67,7 +69,9 @@ jobs:
             exit 0
           fi
 
-          git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin "$comparison_base"
+          # Supply the short-lived workflow token to this one fetch only; never persist it in local Git config.
+          auth_header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+          git -c http.extraheader="AUTHORIZATION: basic $auth_header" -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin "$comparison_base"
           base_blob="$(git -C "$GITHUB_WORKSPACE" ls-tree "$comparison_base" -- salsaRush/db.sqlite3 | awk '{print $3}')"
           head_blob="$(git -C "$GITHUB_WORKSPACE" ls-tree "$GITHUB_SHA" -- salsaRush/db.sqlite3 | awk '{print $3}')"
 
