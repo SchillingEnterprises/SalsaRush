@@ -8,7 +8,7 @@ Do not publish security-sensitive details in public issues. Use GitHub private v
 
 - Only authenticated Django staff accounts can publish events.
 - CSRF middleware protects event forms.
-- Production startup requires DJANGO_SECRET_KEY; DEBUG is disabled by default.
+- Production startup requires a unique DJANGO_SECRET_KEY of at least 50 characters with at least 5 distinct characters; DEBUG is disabled by default. Generate it with `python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'` and store it in a secret manager.
 - The legacy website.User table is not Django authentication. Its password column is retained for database compatibility, marked non-editable, and must never be used for login, registration, or credential storage. Existing values should be treated as sensitive.
 - There is no public registration, checkout, or payment-card collection.
 
