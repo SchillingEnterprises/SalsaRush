@@ -78,10 +78,14 @@ class DatabaseConfigurationTests(unittest.TestCase):
         requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
         self.assertIn("psycopg[binary]==3.3.9", requirements)
 
-    def test_ci_uses_disposable_sqlite_not_tracked_database(self):
+    def test_ci_uses_disposable_sqlite_and_excludes_tracked_database_blob(self):
         workflow = (ROOT / ".github/workflows/django.yml").read_text(encoding="utf-8")
         self.assertIn("DJANGO_DB_ENGINE: sqlite", workflow)
         self.assertIn("/tmp/salsa-rush-ci.sqlite3", workflow)
+        self.assertIn("sparse-checkout:", workflow)
+        self.assertIn("!/salsaRush/db.sqlite3", workflow)
+        self.assertIn("sparse-checkout-cone-mode: false", workflow)
+        self.assertIn("test ! -e salsaRush/db.sqlite3", workflow)
         self.assertNotIn("sha256sum db.sqlite3", workflow)
         self.assertNotIn("EXPECTED_DATABASE_SHA256", workflow)
         self.assertNotIn("Record tracked database checksum", workflow)

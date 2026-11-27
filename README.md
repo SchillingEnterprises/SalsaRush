@@ -49,7 +49,7 @@ python manage.py makemigrations --check --dry-run
 python manage.py test website
 ```
 
-GitHub Actions runs checks on Python 3.12, 3.13, and 3.14 using a temporary SQLite database. It does not write to the tracked salsaRush/db.sqlite3.
+GitHub Actions runs checks on Python 3.12, 3.13, and 3.14 using a temporary SQLite database. The CI sparse checkout excludes the tracked `salsaRush/db.sqlite3` blob; a Git tree-metadata check verifies its object identity is unchanged without opening the file.
 
 ## Hosting
 
