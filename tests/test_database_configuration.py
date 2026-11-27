@@ -55,6 +55,54 @@ class DatabaseConfigurationTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
+    def test_hsts_subdomain_protection_is_opt_in_by_default(self):
+        env = os.environ.copy()
+        env.pop("DJANGO_HSTS_INCLUDE_SUBDOMAINS", None)
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_HSTS_SECONDS": "31536000",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "print(settings.SECURE_HSTS_INCLUDE_SUBDOMAINS)"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertEqual(result.stdout.strip(), "False")
+
+    def test_hsts_subdomain_protection_can_be_enabled_explicitly(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_HSTS_SECONDS": "31536000",
+            "DJANGO_HSTS_INCLUDE_SUBDOMAINS": "true",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "print(settings.SECURE_HSTS_INCLUDE_SUBDOMAINS)"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertEqual(result.stdout.strip(), "True")
+
     def test_sqlite_is_local_default_and_path_can_be_overridden(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
         self.assertIn('os.environ.get("DJANGO_DB_ENGINE", "sqlite")', settings)
