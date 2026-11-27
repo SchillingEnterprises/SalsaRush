@@ -38,6 +38,12 @@ class DatabaseConfigurationTests(unittest.TestCase):
             "DJANGO_SECURE_SSL_REDIRECT": "off",
             "DJANGO_SESSION_COOKIE_SECURE": "0",
             "DJANGO_CSRF_COOKIE_SECURE": "no",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "salsa-rush-ci",
+            "DJANGO_DB_USER": "salsa-rush-ci",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "DJANGO_DB_SSLMODE": "verify-full",
             "PYTHONPATH": str(ROOT / "salsaRush"),
         })
         result = subprocess.run(
@@ -64,6 +70,12 @@ class DatabaseConfigurationTests(unittest.TestCase):
             "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
             "DJANGO_DEBUG": "false",
             "DJANGO_HSTS_SECONDS": "31536000",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "salsa-rush-ci",
+            "DJANGO_DB_USER": "salsa-rush-ci",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "DJANGO_DB_SSLMODE": "verify-full",
             "PYTHONPATH": str(ROOT / "salsaRush"),
         })
         result = subprocess.run(
@@ -88,6 +100,12 @@ class DatabaseConfigurationTests(unittest.TestCase):
             "DJANGO_DEBUG": "false",
             "DJANGO_HSTS_SECONDS": "31536000",
             "DJANGO_HSTS_INCLUDE_SUBDOMAINS": "true",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "salsa-rush-ci",
+            "DJANGO_DB_USER": "salsa-rush-ci",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "DJANGO_DB_SSLMODE": "verify-full",
             "PYTHONPATH": str(ROOT / "salsaRush"),
         })
         result = subprocess.run(
@@ -108,6 +126,112 @@ class DatabaseConfigurationTests(unittest.TestCase):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
         self.assertIn('os.environ.get("DJANGO_DB_ENGINE", "sqlite")', settings)
         self.assertIn('os.environ.get("DJANGO_DB_NAME") or str(BASE_DIR / "db.sqlite3")', settings)
+
+    def test_sqlite_is_restricted_to_debug_development(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
+            "DJANGO_DEBUG": "false",
+            "DJANGO_DB_ENGINE": "sqlite",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; print(settings.DATABASES)"],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("DJANGO_DB_ENGINE=postgresql (or postgres) is required", result.stderr)
+
+        env["DJANGO_DEBUG"] = "true"
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3'"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+    def test_postgresql_requires_verified_tls_and_valid_connection_bounds(self):
+        base = {
+            "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
+            "DJANGO_DEBUG": "false",
+            "DJANGO_ALLOWED_HOSTS": "salsa.example.test",
+            "DJANGO_DB_ENGINE": "postgresql",
+            "DJANGO_DB_NAME": "salsa_rush",
+            "DJANGO_DB_USER": "salsa_rush_app",
+            "DJANGO_DB_PASSWORD": "ci-only-not-a-real-password",
+            "DJANGO_DB_HOST": "db.example.test",
+            "PYTHONPATH": str(ROOT / "salsaRush"),
+        }
+
+        default_tls = os.environ.copy()
+        default_tls.update(base)
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; db=settings.DATABASES['default']; "
+                "assert db['OPTIONS'] == {'sslmode': 'verify-full'}; "
+                "assert db['CONN_MAX_AGE'] == 60; "
+                "assert db['CONN_HEALTH_CHECKS'] is True"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=default_tls,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        verify_ca = os.environ.copy()
+        verify_ca.update({**base, "DJANGO_DB_SSLMODE": "verify-ca"})
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DATABASES['default']['OPTIONS'] == {'sslmode': 'verify-ca'}"
+            )],
+            cwd=ROOT / "salsaRush",
+            env=verify_ca,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        invalid_overrides = (
+            {"DJANGO_DB_SSLMODE": "disable"},
+            {"DJANGO_DB_SSLMODE": "prefer"},
+            {"DJANGO_DB_SSLMODE": "require"},
+            {"DJANGO_DB_PORT": "not-a-port"},
+            {"DJANGO_DB_PORT": "70000"},
+            {"DJANGO_DB_CONN_MAX_AGE": "not-an-integer"},
+            {"DJANGO_DB_CONN_MAX_AGE": "-1"},
+            {"DJANGO_DB_CONN_MAX_AGE": "3601"},
+        )
+        for overrides in invalid_overrides:
+            with self.subTest(overrides=overrides):
+                env = os.environ.copy()
+                env.update({**base, **overrides})
+                result = subprocess.run(
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.DATABASES)"],
+                    cwd=ROOT / "salsaRush",
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                if "DJANGO_DB_SSLMODE" in overrides:
+                    self.assertIn("must verify the server certificate", result.stderr)
 
     def test_secret_key_is_required_even_in_debug_mode(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
