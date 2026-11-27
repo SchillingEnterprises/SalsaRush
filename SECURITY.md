@@ -12,7 +12,7 @@ Do not publish security-sensitive details in public issues. Use GitHub private v
 - The legacy website.User table is not Django authentication. Its password column is retained for database compatibility, marked non-editable, and must never be used for login, registration, or credential storage. Existing values should be treated as sensitive.
 - There is no public registration, checkout, or payment-card collection.
 
-Before production, configure a supported application host, production database, HTTPS, private secrets, backups, monitoring, and a suitable privacy notice. Run Django deployment checks in the target environment.
+Before production, configure a supported application host, production database, HTTPS, private secrets, backups, monitoring, and a suitable privacy notice. Run Django deployment checks in the target environment. HSTS applies to the current host by default; enable `DJANGO_HSTS_INCLUDE_SUBDOMAINS=true` only after confirming that every subdomain is HTTPS-capable.
 
 ## Tracked development database
 
