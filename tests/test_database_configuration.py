@@ -1,5 +1,6 @@
 """Source contracts for Salsa Rush's local and production database configuration."""
 from pathlib import Path
+import secrets
 import os
 import subprocess
 import sys
@@ -13,7 +14,7 @@ class DatabaseConfigurationTests(unittest.TestCase):
         env = os.environ.copy()
         env.update({
             "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
             "DJANGO_DEBUG": "tru",
             "PYTHONPATH": str(ROOT / "salsaRush"),
         })
@@ -32,7 +33,7 @@ class DatabaseConfigurationTests(unittest.TestCase):
         env = os.environ.copy()
         env.update({
             "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
             "DJANGO_DEBUG": "false",
             "DJANGO_SECURE_SSL_REDIRECT": "off",
             "DJANGO_SESSION_COOKIE_SECURE": "0",
@@ -60,7 +61,7 @@ class DatabaseConfigurationTests(unittest.TestCase):
         env.pop("DJANGO_HSTS_INCLUDE_SUBDOMAINS", None)
         env.update({
             "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
             "DJANGO_DEBUG": "false",
             "DJANGO_HSTS_SECONDS": "31536000",
             "PYTHONPATH": str(ROOT / "salsaRush"),
@@ -83,7 +84,7 @@ class DatabaseConfigurationTests(unittest.TestCase):
         env = os.environ.copy()
         env.update({
             "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
-            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_SECRET_KEY": secrets.token_urlsafe(64),
             "DJANGO_DEBUG": "false",
             "DJANGO_HSTS_SECONDS": "31536000",
             "DJANGO_HSTS_INCLUDE_SUBDOMAINS": "true",
@@ -113,6 +114,29 @@ class DatabaseConfigurationTests(unittest.TestCase):
         self.assertIn('SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")', settings)
         self.assertIn('raise ImproperlyConfigured(', settings)
         self.assertNotIn("django-insecure-local-development-only-change-me", settings)
+
+    def test_secret_key_requires_minimum_length_and_character_diversity(self):
+        for value, expected in (
+            ("x" * 49, "at least 50 characters"),
+            ("x" * 80, "at least 5 distinct characters"),
+        ):
+            with self.subTest(expected=expected):
+                env = os.environ.copy()
+                env.update({
+                    "DJANGO_SETTINGS_MODULE": "salsaRush.settings",
+                    "DJANGO_SECRET_KEY": value,
+                    "PYTHONPATH": str(ROOT / "salsaRush"),
+                })
+                result = subprocess.run(
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.SECRET_KEY)"],
+                    cwd=ROOT / "salsaRush",
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(expected, result.stderr)
 
     def test_postgresql_requires_all_connection_values(self):
         settings = (ROOT / "salsaRush/salsaRush/settings.py").read_text(encoding="utf-8")
