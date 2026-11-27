@@ -27,7 +27,7 @@ jobs:
         working-directory: salsaRush
     env:
       DJANGO_SECRET_KEY: ci-only-deployment-check-key-long-enough-for-django-security-validation
-      DJANGO_DEBUG: "false"
+      DJANGO_DEBUG: "true"
       DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
       DJANGO_DB_ENGINE: sqlite
       DJANGO_SECURE_SSL_REDIRECT: "false"
@@ -108,6 +108,13 @@ jobs:
           DJANGO_SESSION_COOKIE_SECURE: "true"
           DJANGO_CSRF_COOKIE_SECURE: "true"
           DJANGO_HSTS_SECONDS: "31536000"
+          DJANGO_DB_ENGINE: postgresql
+          DJANGO_DB_NAME: salsa-rush-ci-check
+          DJANGO_DB_USER: salsa-rush-ci-check
+          DJANGO_DB_PASSWORD: ci-only-not-a-real-password
+          DJANGO_DB_HOST: db.example.test
+          DJANGO_DB_PORT: "5432"
+          DJANGO_DB_SSLMODE: verify-full
         run: python manage.py check --deploy --fail-level ERROR
 
       - name: Verify migrations match models
