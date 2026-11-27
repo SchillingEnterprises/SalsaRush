@@ -128,7 +128,7 @@ class DatabaseConfigurationTests(unittest.TestCase):
                     "PYTHONPATH": str(ROOT / "salsaRush"),
                 })
                 result = subprocess.run(
-                    [sys.executable, "-c", "from django.conf import settings"],
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.SECRET_KEY)"],
                     cwd=ROOT / "salsaRush",
                     env=env,
                     capture_output=True,
